@@ -27,7 +27,7 @@ subjectCode = []
 skipSecond = True
 for subject in soup.find_all('a'):
 	if skipSecond:
-		subjects[subject.string] = subject.get('href')
+		subjects[subject.string] = subject.get('href').split('/')[-1]
 		skipSecond = False
 	else:
 		skipSecond = True
@@ -36,17 +36,15 @@ print "Subjects you are taking this semester"
 for subjName in subjects:
 	print "\t"+subjName
 print
-for subjCode in subjects.values():
-	subjectCode.append(subjCode.split('/')[-1])
 
 fastDLLink = "https://mmls.mmu.edu.my/fast-download:"
 formAction = ["https://mmls.mmu.edu.my/download-note-all","https://mmls.mmu.edu.my/download-tutorial-all"]
 identifier = ["[Lecture] ","[Tutorial] "]
 i = 0
 index = 0
-for subjCode in subjectCode:
+for subject in subjects:
 	for actions in formAction:
-		response = br.open(fastDLLink+subjCode)
+		response = br.open(fastDLLink+subjects[subject])
 		soup = BeautifulSoup(br.response().read(),"html.parser")
 
 		#To avoid Parsing error: OPTION outside of select 
@@ -67,8 +65,8 @@ for subjCode in subjectCode:
 		br.method = "POST"
 		response = br.submit()
 		if i==0:
-			print "Downloading notes for " + subjects.keys()[index]
-		filename = identifier[i]+subjects.keys()[index]+'.zip'
+			print "Downloading notes for " + subject
+		filename = identifier[i]+subject+'.zip'
 		open(str(filename), 'wb').write(response.read())
 		i = (i+1)%2
 	index += 1
