@@ -8,7 +8,11 @@ print "\tMMLS - Downloads your lecture and tutorial notes~\n"
 
 #HANDLES LOGIN
 while True:
-	response = br.open("http://mmls.mmu.edu.my/")
+	try:
+		response = br.open("http://mmls.mmu.edu.my/")
+	except:
+		print "Offline!"
+		raise SystemExit(0)
 	br.select_form(nr=0)         
 	br.form["stud_id"] = raw_input("Student ID : ")
 	br.form["stud_pswrd"] = getpass.getpass("MMLS Password (Password will be hidden): ")
