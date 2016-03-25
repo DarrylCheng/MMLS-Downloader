@@ -4,32 +4,42 @@ import getpass, os
 
 br = mechanize.Browser()
 mechanize.HTTPSHandler()
-print "\tMMLS - Downloads your lecture and tutorial notes~\n"
+print "\tMMLS downloader - Keep your notes up to date!\n"
+
+try:
+	response = br.open("http://mmls.mmu.edu.my/")
+except:
+	print "Offline!"
+	raise SystemExit(0)
 
 #HANDLES LOGIN
 while True:
-	try:
-		response = br.open("http://mmls.mmu.edu.my/")
-	except:
-		print "Offline!"
-		raise SystemExit(0)
+	userinfo = []
+	if os.path.isfile("pwd.txt"):
+		with open("pwd.txt") as f:
+			userinfo = f.read().splitlines()
+	else:
+		userinfo.append(raw_input("Student ID : "))
+		userinfo.append(getpass.getpass("MMLS Password (Password will be hidden): "))
+
 	br.select_form(nr=0)         
-	br.form["stud_id"] = raw_input("Student ID : ")
-	br.form["stud_pswrd"] = getpass.getpass("MMLS Password (Password will be hidden): ")
+	br.form["stud_id"] = userinfo[0]
+	br.form["stud_pswrd"] = userinfo[1]
 	br.method = "POST"
 	response = br.submit()
 
 	soup = BeautifulSoup(br.response().read(), "html.parser")
 	if soup.find("div", {"id" : "alert"}) == None:
+		open("pwd.txt",'w').write(userinfo[0]+"\n"+userinfo[1])
 		break
 	else:
+		if os.path.isfile("pwd.txt"):
+			os.remove("pwd.txt")
 		print "Wrong username/password"
-
 
 #Get subject name and code and store them in a list
 soup = soup.find("div", {"class": "list-group "})
 subjects = {}
-subjectCode = []
 skipSecond = True #To filter the repetition
 
 for subject in soup.find_all('a'):
@@ -40,7 +50,7 @@ for subject in soup.find_all('a'):
 		skipSecond = True
 
 #Prints subject names and creates each respective directory if not created
-print "Subjects you are taking this semester"
+print "\nSubjects you are taking this trimester"
 for subjName in subjects:
 	print "\t"+subjName
 	#Make directories in current directory for each subject
@@ -61,9 +71,8 @@ print #newline
 
 #Initialize
 fastDLLink = "https://mmls.mmu.edu.my/fast-download:"
-formAction = ["https://mmls.mmu.edu.my/download-note-all","https://mmls.mmu.edu.my/download-tutorial-all"]
-identifier = ["[Lecture] ","[Tutorial] "]
-subjIndex = 0
+# formAction = ["https://mmls.mmu.edu.my/download-note-all","https://mmls.mmu.edu.my/download-tutorial-all"]
+# identifier = ["[Lecture] ","[Tutorial] "]
 
 for subject in subjects: 
 	#Get fast download page
@@ -112,7 +121,7 @@ for subject in subjects:
 			filename = fileName[count]
 			fpath = str(subject+"/"+directory+filename)
 			if os.path.isfile(fpath) == False:
-				print "..Downloading " + filename
+				print "...Downloading " + filename
 				br.form = forms
 				br.method = "POST"
 				response = br.submit()
