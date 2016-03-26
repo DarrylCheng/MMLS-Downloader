@@ -30,6 +30,7 @@ while True:
 
 	soup = BeautifulSoup(br.response().read(), "html.parser")
 	if soup.find("div", {"id" : "alert"}) == None:
+		print "Logged in as " + userinfo[0]
 		open("pwd.txt",'w').write(userinfo[0]+"\n"+userinfo[1])
 		break
 	else:
@@ -40,14 +41,10 @@ while True:
 #Get subject name and code and store them in a list
 soup = soup.find("div", {"class": "list-group "})
 subjects = {}
-skipSecond = True #To filter the repetition
-
 for subject in soup.find_all('a'):
-	if skipSecond:
-		subjects[subject.string] = subject.get('href').split('/')[-1]
-		skipSecond = False
-	else:
-		skipSecond = True
+	if subject.get('href').split('/')[-1] in subjects.values():
+		continue
+	subjects[subject.string] = subject.get('href').split('/')[-1]
 
 #Prints subject names and creates each respective directory if not created
 print "\nSubjects you are taking this trimester"
@@ -89,7 +86,7 @@ for subject in subjects:
 	response.set_data(str(soup))
 	br.set_response(response)
 
-	#Get lecture and tutorial file names
+	#Get lecture, tutorial and assignment file names
 	soup2 = BeautifulSoup(br.response().read(),"html.parser")
 	soup2 = soup.find('div', {"id" : "notes"})
 	fileName = []
@@ -107,6 +104,14 @@ for subject in subjects:
 			continue
 		fileName.append(name['value'])
 
+	tutSize = len(fileName)
+	soup2 = soup.find('div', {"id" : "assignment"})
+	for div in soup2.findAll("form"):
+		name = div.find("input", {"name" : "file_name"})
+		if(name == None):
+			continue
+		fileName.append(name['value'])
+
 	print "Checking files to download for " + subject
 	count = 0
 	#Handles download
@@ -116,8 +121,10 @@ for subject in subjects:
 				break
 			if count < noteSize:
 				directory = "Lecture notes/"
-			else:
+			elif count < tutSize:
 				directory = "Tutorial and labs/"
+			else:
+				directory = ""
 			filename = fileName[count]
 			fpath = str(subject+"/"+directory+filename)
 			if os.path.isfile(fpath) == False:
@@ -141,3 +148,4 @@ for subject in subjects:
 			count += 1
 
 print "Updated."
+raw_input('Press <ENTER> to continue')
