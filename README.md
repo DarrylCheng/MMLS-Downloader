@@ -10,6 +10,6 @@ You only need to login correctly ONCE and the next time you start the program yo
 
 **This program is compiled in Python 2.7** 
 
-**Modules ued**
+**Modules used**
 * BeautifulSoup
 * mechanize
