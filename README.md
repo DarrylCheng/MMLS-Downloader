@@ -1,6 +1,6 @@
 **MMLS DOWNLOADER**
 Keep all your lecture, tutorial and assignments up to date.
-All files will beatomatically grouped according to the subject and type.
+All files will be automatically grouped according to the subject and type.
 
 **MMLS.py is no longer supported, although it works.**
 **Please use MMLSDownloader.py**
