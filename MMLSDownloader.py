@@ -1,6 +1,6 @@
 import mechanize
 from bs4 import BeautifulSoup
-import getpass, os
+import getpass, os, base64
 
 br = mechanize.Browser()
 mechanize.HTTPSHandler()
@@ -18,6 +18,10 @@ while True:
 	if os.path.isfile("pwd.txt"):
 		with open("pwd.txt") as f:
 			userinfo = f.read().splitlines()
+		try:
+			userinfo[1] = base64.b64decode(userinfo[1])
+		except:
+			pass
 	else:
 		userinfo.append(raw_input("Student ID : "))
 		userinfo.append(getpass.getpass("MMLS Password (Password will be hidden): "))
@@ -31,7 +35,7 @@ while True:
 	soup = BeautifulSoup(br.response().read(), "html.parser")
 	if soup.find("div", {"id" : "alert"}) == None:
 		print "Logged in as " + userinfo[0]
-		open("pwd.txt",'w').write(userinfo[0]+"\n"+userinfo[1])
+		open("pwd.txt",'w').write(userinfo[0]+"\n"+base64.b64encode(userinfo[1]))
 		break
 	else:
 		if os.path.isfile("pwd.txt"):
