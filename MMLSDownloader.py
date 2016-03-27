@@ -92,29 +92,19 @@ for subject in subjects:
 
 	#Get lecture, tutorial and assignment file names
 	soup2 = BeautifulSoup(br.response().read(),"html.parser")
-	soup2 = soup.find('div', {"id" : "notes"})
 	fileName = []
-	for div in soup2.findAll("form"):
-		name = div.find("input", {"name" : "file_name"})
-		if(name == None):
-			continue
-		fileName.append(name['value'])
+	def getFileList(types,fileName):
+		soup2 = soup.find('div', {"id" : types})
+		for div in soup2.findAll("form"):
+			name = div.find("input", {"name" : "file_name"})
+			if(name == None):
+				continue
+			fileName.append(name['value'])
+		return len(fileName)
 
-	noteSize = len(fileName)
-	soup2 = soup.find('div', {"id" : "tutorial"})
-	for div in soup2.findAll("form"):
-		name = div.find("input", {"name" : "file_name"})
-		if(name == None):
-			continue
-		fileName.append(name['value'])
-
-	tutSize = len(fileName)
-	soup2 = soup.find('div', {"id" : "assignment"})
-	for div in soup2.findAll("form"):
-		name = div.find("input", {"name" : "file_name"})
-		if(name == None):
-			continue
-		fileName.append(name['value'])
+	noteSize = getFileList("notes", fileName)
+	tutSize = getFileList("tutorial", fileName)
+	assignmentSize = getFileList("assignment", fileName)
 
 	print "Checking files to download for " + subject
 	count = 0
