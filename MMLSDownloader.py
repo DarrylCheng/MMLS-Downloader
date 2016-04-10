@@ -72,26 +72,48 @@ print #newline
 
 #Initialize
 fastDLLink = "https://mmls.mmu.edu.my/fast-download:"
+courseOutline = "https://mmls.mmu.edu.my/courseOutline:"
 # formAction = ["https://mmls.mmu.edu.my/download-note-all","https://mmls.mmu.edu.my/download-tutorial-all"]
 # identifier = ["[Lecture] ","[Tutorial] "]
 
 for subject in subjects: 
+	def fixParseError(soup):
+		#To avoid Parsing error: OPTION outside of select 
+		for div in soup.findAll('select'):
+		    div.extract()
+
+		for div in soup.findAll('script'):
+		    div.extract()
+		return str(soup)
+
+	print "Checking files to download for " + subject
+	#Get course outline
+	response = br.open(courseOutline+subjects[subject])
+	soup = BeautifulSoup(br.response().read(),"html.parser")
+	soup = soup.find('form', {"action" : "https://mmls.mmu.edu.my/form-download-outline"})
+	if soup != None:
+		name = soup.find("input", {"name" : "btnsubmit"})
+		outlineFileName = name['value']
+		response.set_data(fixParseError(soup))
+		br.set_response(response)
+
+		for forms in br.forms():
+			if forms.attrs.get('action') == "https://mmls.mmu.edu.my/form-download-outline":
+				fpath = str(subject+"/"+outlineFileName)
+				if os.path.isfile(fpath) == False:
+					print "...Downloading " + outlineFileName
+					br.form = forms
+					br.method = "POST"
+					response = br.submit()
+					open(fpath, 'wb').write(response.read())
+
 	#Get fast download page
 	response = br.open(fastDLLink+subjects[subject])
 	soup = BeautifulSoup(br.response().read(),"html.parser")
-
-	#To avoid Parsing error: OPTION outside of select 
-	for div in soup.findAll('select'):
-	    div.extract()
-
-	for div in soup.findAll('script'):
-	    div.extract()
-
-	response.set_data(str(soup))
+	response.set_data(fixParseError(soup))
 	br.set_response(response)
 
 	#Get lecture, tutorial and assignment file names
-	soup2 = BeautifulSoup(br.response().read(),"html.parser")
 	fileName = []
 	def getFileList(types,fileName):
 		soup2 = soup.find('div', {"id" : types})
@@ -106,7 +128,6 @@ for subject in subjects:
 	tutSize = getFileList("tutorial", fileName)
 	assignmentSize = getFileList("assignment", fileName)
 
-	print "Checking files to download for " + subject
 	count = 0
 	#Handles download
 	for forms in br.forms():
@@ -130,16 +151,10 @@ for subject in subjects:
 				response = br.open(fastDLLink+subjects[subject])
 				soup = BeautifulSoup(br.response().read(),"html.parser")
 
-				#To avoid Parsing error: OPTION outside of select 
-				for div in soup.findAll('select'):
-				    div.extract()
-
-				for div in soup.findAll('script'):
-				    div.extract()
-
-				response.set_data(str(soup))
+				response.set_data(fixParseError(soup))
 				br.set_response(response)
 			count += 1
 
 print "Updated."
 raw_input('Press <ENTER> to continue')
+#https://mmls.mmu.edu.my/courseOutline:170:1459114950
