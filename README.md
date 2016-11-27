@@ -11,5 +11,3 @@ All files will be automatically grouped according to the subject and type.
 
 You only need to login correctly ONCE.
 (Your login credentials are saved in a text file, might do some work on this)
-**MMLS.py is no longer supported, although it works.**
-**Please use MMLSDownloader.py**
