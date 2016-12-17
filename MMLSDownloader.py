@@ -140,7 +140,7 @@ class MMLSDownloader:
 				elif noteType == 'assignment':
 					directory = '[Assignment] '
 				else:
-					break
+					directory = '[Unlabeled] '
 				fpath = str(subject+"/"+directory+forms['file_name'])
 				if os.path.isfile(fpath) == False:
 					print "...Downloading " + forms['file_name']
